@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { products } from "@/lib/products";
-import { money } from "@/lib/utils";
+import { moneyPaise } from "@/lib/utils";
 
 export default function Home() {
   return (
@@ -18,7 +18,7 @@ export default function Home() {
           <Link key={p.id} href={`/customizer?product=${p.id}`} className="rounded-xl border border-slate-200 p-4 text-center transition hover:shadow-md dark:border-slate-800">
             <div className="text-5xl">{p.emoji}</div>
             <div className="mt-2 text-sm font-medium">{p.name}</div>
-            <div className="text-xs text-slate-500">from {money(p.suggestedPrice)}</div>
+            <div className="text-xs text-slate-500">from {moneyPaise(p.price)}</div>
           </Link>
         ))}
       </section>

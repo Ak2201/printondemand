@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import type { fabric as FabricNS } from "fabric";
 import { Download, ImagePlus, ShoppingCart, Trash2, Type } from "lucide-react";
 import { getProduct, products } from "@/lib/products";
-import { cn, money } from "@/lib/utils";
+import { cn, moneyPaise } from "@/lib/utils";
 import { useCart } from "@/store/cart";
 import type { ProductView } from "@/types";
 
@@ -34,6 +34,7 @@ export function Customizer() {
   const [selected, setSelected] = useState<FabricNS.Object | null>(null);
   const [scale, setScale] = useState(1);
   const [angle, setAngle] = useState(0);
+  const [size, setSize] = useState("M");
   const add = useCart((s) => s.add);
 
   const area = printArea[view];
@@ -150,7 +151,7 @@ export function Customizer() {
 
   const addToCart = () => {
     const small = canvasRef.current?.toDataURL({ format: "png", multiplier: 0.5 });
-    add({ id: `${product.id}-${color}-${Date.now()}`, productId: product.id, name: product.name, color, price: product.suggestedPrice, quantity: 1, preview: small });
+    add({ id: `${product.id}-${color}-${Date.now()}`, productId: product.id, name: product.name, color: product.colors.find((c) => c.hex === color)?.name ?? product.colors[0].name, size: product.sizes ? size : undefined, price: product.price, quantity: 1, preview: small });
   };
 
   return (
@@ -187,6 +188,16 @@ export function Customizer() {
             ))}
           </div>
         </div>
+        {product.sizes && (
+          <div>
+            <h2 className="mb-2 text-sm font-semibold">Size</h2>
+            <div className="flex flex-wrap gap-2">
+              {product.sizes.map((s) => (
+                <button key={s} onClick={() => setSize(s)} className={cn("rounded border px-3 py-1 text-sm", s === size ? "border-brand-600 bg-brand-50 text-brand-700 dark:bg-slate-800" : "border-slate-300 dark:border-slate-700")}>{s}</button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="space-y-2">
           <h2 className="text-sm font-semibold">Add</h2>
           <label className="flex cursor-pointer items-center gap-2 rounded border border-dashed border-slate-400 p-2 text-sm">
@@ -212,7 +223,7 @@ export function Customizer() {
           <button onClick={remove} className="flex items-center gap-2 text-sm text-red-600"><Trash2 size={14} /> Delete</button>
         </div>
         <div className="space-y-2 border-t border-slate-200 pt-4 dark:border-slate-800">
-          <div className="flex justify-between text-sm"><span>Price</span><strong>{money(product.suggestedPrice)}</strong></div>
+          <div className="flex justify-between text-sm"><span>Price</span><strong>{moneyPaise(product.price)}</strong></div>
           <button onClick={addToCart} className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 p-2.5 text-white hover:bg-brand-700"><ShoppingCart size={16} /> Add to cart</button>
           <button onClick={download} className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 p-2.5 text-sm dark:border-slate-700"><Download size={16} /> Export hi-res PNG</button>
         </div>
