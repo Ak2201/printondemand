@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { checkoutSchema, priceCart } from "@/lib/checkout";
+import { checkDesignsExist } from "@/lib/designs";
 import { createPendingOrder } from "@/lib/orders";
 import { getRazorpay, mockAllowed, razorpayConfigured } from "@/lib/razorpay";
 
@@ -14,6 +15,9 @@ export async function POST(req: Request) {
   try { cart = priceCart(items); } catch (e) {
     return NextResponse.json({ error: (e as Error).message }, { status: 400 });
   }
+
+  const missing = checkDesignsExist(items);
+  if (missing) return NextResponse.json({ error: missing }, { status: 400 });
 
   let razorpayOrderId: string;
   if (razorpayConfigured()) {

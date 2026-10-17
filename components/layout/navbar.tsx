@@ -6,6 +6,7 @@ import { Menu, Moon, ShoppingCart, Sun, X } from "lucide-react";
 import { useCart } from "@/store/cart";
 
 const links = [
+  { href: "/designs", label: "Designs" },
   { href: "/shop", label: "Shop" },
   { href: "/customizer", label: "Customizer" },
   { href: "/pricing-calculator", label: "Pricing" },
@@ -33,7 +34,7 @@ export function Navbar() {
             onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
             {mounted && resolvedTheme === "dark" ? <Sun size={18} /> : <Moon size={18} />}
           </button>
-          <Link href="/shop" aria-label="Cart" className="relative rounded p-2 hover:bg-slate-100 dark:hover:bg-slate-800">
+          <Link href="/cart" aria-label="Cart" className="relative rounded p-2 hover:bg-slate-100 dark:hover:bg-slate-800">
             <ShoppingCart size={18} />
             {mounted && count > 0 && (
               <span className="absolute -right-1 -top-1 rounded-full bg-brand-600 px-1.5 text-[10px] text-white">{count}</span>

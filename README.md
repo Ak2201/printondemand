@@ -2,7 +2,18 @@
 
 Next.js 14 (App Router) · TypeScript · Tailwind · Fabric.js · Zustand · Supabase · Razorpay
 
+## Run locally (no accounts needed)
+```bash
+npm install
+npm run dev   # http://localhost:3000
+```
+Upload a photo in `/customizer`, add to cart, pay with the built-in mock payment, then open `/admin/orders` to download the print-ready PNG, packing slip and job file (also written to `.data/print-jobs/<order>/`). Set `ADMIN_TOKEN` to protect `/admin` (required in production; open it with `?token=…`).
+
 ## Features
+- `/designs` — 16 ready-made designs; pick product/colour/size and buy as is, or send one to the customizer
+- `/customizer` — live mockups (T-shirt, hoodie, mug, case, canvas); upload photos by click, drag & drop or paste; DPI warning; print-file download
+- `/cart` — cart, delivery address, Razorpay payment; `/orders/<id>` confirmation
+- `/admin/orders` — print files, retry fulfilment, mark shipped
 - `/customizer` — Fabric.js canvas: image upload, text, colors, scale/rotate, front/back/wrap views, hi-res (4x) PNG export
 - `/pricing-calculator` — profit/unit, margin, monthly profit, ROI, break-even units
 - `/shop` — catalog + persisted cart + Razorpay Checkout (INR, prepaid only, GST-inclusive prices)

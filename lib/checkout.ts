@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { designPathRe } from "@/lib/design-path";
+import { designPathRe, slugRe } from "@/lib/design-path";
 import { getProduct } from "@/lib/products";
 
 export const FREE_SHIPPING_ABOVE = 99900; // paise
@@ -22,6 +22,7 @@ export const checkoutSchema = z.object({
     color: z.string(),
     size: z.string().optional(),
     designPath: z.string().regex(designPathRe).optional(),
+    designSlug: z.string().max(80).regex(slugRe).optional(),
     quantity: z.number().int().min(1).max(20),
   })).min(1).max(30),
   address: addressSchema,
@@ -36,6 +37,7 @@ export function priceCart(items: CheckoutInput["items"]) {
     if (!p) throw new Error(`Unknown product ${i.productId}`);
     if (!p.colors.some((c) => c.name === i.color)) throw new Error(`Invalid color for ${p.name}`);
     if (p.sizes && !(i.size && p.sizes.includes(i.size))) throw new Error(`Size required for ${p.name}`);
+    if (!!i.designPath === !!i.designSlug) throw new Error(`${p.name}: provide exactly one of designPath (customised) or designSlug (ready-made)`);
     return { ...i, unitPrice: p.price };
   });
   const subtotal = lines.reduce((n, l) => n + l.unitPrice * l.quantity, 0);

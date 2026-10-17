@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
-import { markPaid } from "@/lib/orders";
+import { getOrderIdByRazorpayId, markPaid } from "@/lib/orders";
 import { mockAllowed, razorpayConfigured, verifyPaymentSignature } from "@/lib/razorpay";
 
 const schema = z.object({
@@ -23,5 +23,5 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Payments are not configured" }, { status: 503 });
   }
   await markPaid({ razorpayOrderId: b.razorpay_order_id, paymentId: b.razorpay_payment_id, amount: b.amount });
-  return NextResponse.json({ verified: true });
+  return NextResponse.json({ verified: true, orderId: await getOrderIdByRazorpayId(b.razorpay_order_id) });
 }

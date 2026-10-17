@@ -23,6 +23,7 @@ export interface CartItem {
   size?: string;
   price: number; // display only; server recomputes
   designPath?: string; // uploaded print-ready PNG (storage path)
+  view?: ProductView; // which side the custom design is printed on
   designSlug?: string; // ready-made design from the catalog (public/designs/<slug>.svg)
   quantity: number;
   preview?: string;
