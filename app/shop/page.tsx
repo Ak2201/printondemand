@@ -37,7 +37,7 @@ export default function Shop() {
     setBusy(true); setNote(null);
     try {
       const res = await fetch("/api/checkout", { method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: items.map((i) => ({ productId: i.productId, color: i.color, size: i.size, quantity: i.quantity })), address: addr }) });
+        body: JSON.stringify({ items: items.map((i) => ({ productId: i.productId, color: i.color, size: i.size, designPath: i.designPath, quantity: i.quantity })), address: addr }) });
       const d = await res.json();
       if (!res.ok) { setNote({ ok: false, text: d.error ?? "Checkout failed" }); return; }
       if (d.mock) { await confirm(d, { razorpay_payment_id: `pay_mock_${Date.now()}`, razorpay_signature: "mock" }); return; }

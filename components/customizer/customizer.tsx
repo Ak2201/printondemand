@@ -6,10 +6,11 @@ import { Download, ImagePlus, ShoppingCart, Trash2, Type } from "lucide-react";
 import { getProduct, products } from "@/lib/products";
 import { cn, moneyPaise } from "@/lib/utils";
 import { useCart } from "@/store/cart";
+import { supabaseBrowser } from "@/lib/supabase/browser";
 import type { ProductView } from "@/types";
 
 const SIZE = 500;
-const EXPORT_MULTIPLIER = 4; // 500px -> 2000px hi-res PNG
+const EXPORT_MULTIPLIER = 8; // print area 280x340 -> 2240x2720 px PNG
 const printArea: Record<ProductView, { w: number; h: number }> = {
   front: { w: 280, h: 340 },
   back: { w: 280, h: 340 },
@@ -36,6 +37,8 @@ export function Customizer() {
   const [angle, setAngle] = useState(0);
   const [size, setSize] = useState("M");
   const add = useCart((s) => s.add);
+  const [adding, setAdding] = useState(false);
+  const [error, setError] = useState("");
 
   const area = printArea[view];
 
@@ -149,9 +152,25 @@ export function Customizer() {
     a.href = url; a.download = `${product.id}-${view}-design.png`; a.click();
   };
 
-  const addToCart = () => {
+  /** Upload the print-ready PNG straight to Supabase Storage via a server-signed slot. Returns undefined in local dev. */
+  const uploadDesign = async (): Promise<string | undefined> => {
+    const dataUrl = exportPng(); if (!dataUrl) return undefined;
+    const slotRes = await fetch("/api/designs", { method: "POST" });
+    if (!slotRes.ok) return undefined; // storage not configured (dev)
+    const { path, token } = await slotRes.json();
+    const blob = await (await fetch(dataUrl)).blob();
+    const { error } = await supabaseBrowser().storage.from("designs").uploadToSignedUrl(path, token, blob, { contentType: "image/png" });
+    if (error) throw error;
+    return path;
+  };
+
+  const addToCart = async () => {
+    setAdding(true); setError("");
+    let designPath: string | undefined;
+    try { designPath = await uploadDesign(); } catch { setError("Could not upload your design. Please try again."); setAdding(false); return; }
     const small = canvasRef.current?.toDataURL({ format: "png", multiplier: 0.5 });
-    add({ id: `${product.id}-${color}-${Date.now()}`, productId: product.id, name: product.name, color: product.colors.find((c) => c.hex === color)?.name ?? product.colors[0].name, size: product.sizes ? size : undefined, price: product.price, quantity: 1, preview: small });
+    add({ id: `${product.id}-${color}-${Date.now()}`, productId: product.id, name: product.name, color: product.colors.find((c) => c.hex === color)?.name ?? product.colors[0].name, size: product.sizes ? size : undefined, price: product.price, quantity: 1, preview: small, designPath });
+    setAdding(false);
   };
 
   return (
@@ -224,7 +243,8 @@ export function Customizer() {
         </div>
         <div className="space-y-2 border-t border-slate-200 pt-4 dark:border-slate-800">
           <div className="flex justify-between text-sm"><span>Price</span><strong>{moneyPaise(product.price)}</strong></div>
-          <button onClick={addToCart} className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-600 p-2.5 text-white hover:bg-brand-700"><ShoppingCart size={16} /> Add to cart</button>
+          <button onClick={addToCart} disabled={adding} className="flex w-full disabled:opacity-50 items-center justify-center gap-2 rounded-lg bg-brand-600 p-2.5 text-white hover:bg-brand-700"><ShoppingCart size={16} /> {adding ? "Saving design…" : "Add to cart"}</button>
+          {error && <p className="text-sm text-red-600">{error}</p>}
           <button onClick={download} className="flex w-full items-center justify-center gap-2 rounded-lg border border-slate-300 p-2.5 text-sm dark:border-slate-700"><Download size={16} /> Export hi-res PNG</button>
         </div>
       </aside>

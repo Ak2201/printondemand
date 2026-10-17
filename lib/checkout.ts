@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { designPathRe } from "@/lib/design-path";
 import { getProduct } from "@/lib/products";
 
 export const FREE_SHIPPING_ABOVE = 99900; // paise
@@ -20,6 +21,7 @@ export const checkoutSchema = z.object({
     productId: z.string(),
     color: z.string(),
     size: z.string().optional(),
+    designPath: z.string().regex(designPathRe).optional(),
     quantity: z.number().int().min(1).max(20),
   })).min(1).max(30),
   address: addressSchema,

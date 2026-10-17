@@ -22,6 +22,7 @@ export interface CartItem {
   color: string;
   size?: string;
   price: number; // display only; server recomputes
+  designPath?: string; // Supabase Storage path of the print-ready PNG
   quantity: number;
   preview?: string;
 }
