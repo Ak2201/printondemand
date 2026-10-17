@@ -12,7 +12,10 @@ interface NewOrder {
 }
 
 // Dev-only fallback when Supabase is not configured. Not durable and not shared across serverless instances.
-const mem = { orders: new Map<string, { id: string; status: string; total: number; snap: OrderSnapshot }>(), events: new Set<string>() };
+type Mem = { orders: Map<string, { id: string; status: string; total: number; snap: OrderSnapshot }>; events: Set<string> };
+// On globalThis so separate route bundles in `next dev` share one store.
+const g = globalThis as unknown as { __podMem?: Mem };
+const mem: Mem = (g.__podMem ??= { orders: new Map(), events: new Set() });
 
 export async function createPendingOrder(o: NewOrder): Promise<string> {
   const db = getAdmin();
